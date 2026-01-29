@@ -1,0 +1,25 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: crossplane-heaven
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  ref:
+    branch: master
+  url: https://github.com/stevedores-org/crossplane-heaven.git
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: crossplane-infrastructure
+  namespace: flux-system
+spec:
+  interval: 5m0s
+  path: ./infrastructure
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: crossplane-heaven
+  targetNamespace: crossplane-system
