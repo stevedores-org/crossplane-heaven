@@ -23,4 +23,9 @@ export const config: InfraConfigType = {
       },
     ],
   },
+  storage: [
+    { name: "oxidizedgraph-data", size: "20Gi" },
+    { name: "oxidizedrag-db", size: "50Gi" },
+    { name: "gitoxide-repos", size: "100Gi" },
+  ],
 };

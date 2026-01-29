@@ -9,11 +9,9 @@ import {
   generateControllerConfig,
   generateServiceAccount,
 } from "./src/generators/crossplane";
-import {
-  generateGitRepository,
-  generateFluxKustomization,
-} from "./src/generators/flux";
+import { generateGitRepository, generateFluxKustomization } from "./src/generators/flux";
 import { generateClusterSecretStore } from "./src/generators/eso";
+import { generatePVCs } from "./src/generators/storage";
 
 const OUTPUT_DIR = "../../infrastructure";
 
@@ -89,6 +87,13 @@ const gcpClaimsKustomization = generateFluxKustomization(
   ["infrastructure-gcp-definitions"]
 );
 
+const storageKustomization = generateFluxKustomization(
+  "infrastructure-storage",
+  "./infrastructure/storage",
+  config.github.repo,
+  ["infrastructure-gcp-claims"]
+);
+
 writeYaml("../clusters/stevedores-cluster/flux-system/gotk-sync.yaml", [
   gitRepo,
   crossplaneKustomization,
@@ -97,11 +102,18 @@ writeYaml("../clusters/stevedores-cluster/flux-system/gotk-sync.yaml", [
   providerConfigKustomization,
   gcpDefinitionsKustomization,
   gcpClaimsKustomization,
+  storageKustomization,
 ]);
 
 // 3. Generate ESO ClusterSecretStore
 const clusterSecretStore = generateClusterSecretStore(config);
 writeYaml("eso/cluster-secret-store.yaml", [clusterSecretStore]);
+
+// 4. Generate Storage manifests
+const pvcs = generatePVCs(config);
+if (pvcs.length > 0) {
+  writeYaml("storage/manifests.yaml", pvcs);
+}
 
 console.log("\n✨ All manifests generated successfully!");
 console.log("\n📝 Next steps:");

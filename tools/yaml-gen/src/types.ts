@@ -84,6 +84,21 @@ export const ClusterSecretStore = K8sResource.extend({
   }),
 });
 
+// Kubernetes PersistentVolumeClaim
+export const PersistentVolumeClaim = K8sResource.extend({
+  apiVersion: z.literal("v1"),
+  kind: z.literal("PersistentVolumeClaim"),
+  spec: z.object({
+    accessModes: z.array(z.string()),
+    storageClassName: z.string().optional(),
+    resources: z.object({
+      requests: z.object({
+        storage: z.string(),
+      }),
+    }),
+  }),
+});
+
 // Config types
 export const InfraConfig = z.object({
   project: z.object({
@@ -101,11 +116,22 @@ export const InfraConfig = z.object({
   }),
   crossplane: z.object({
     version: z.string(),
-    providers: z.array(z.object({
-      name: z.string(),
-      package: z.string(),
-    })),
+    providers: z.array(
+      z.object({
+        name: z.string(),
+        package: z.string(),
+      })
+    ),
   }),
+  storage: z
+    .array(
+      z.object({
+        name: z.string(),
+        size: z.string(),
+        storageClass: z.string().optional(),
+      })
+    )
+    .optional(),
 });
 
 export type InfraConfigType = z.infer<typeof InfraConfig>;
@@ -113,3 +139,4 @@ export type CrossplaneProviderType = z.infer<typeof CrossplaneProvider>;
 export type ProviderConfigType = z.infer<typeof ProviderConfig>;
 export type FluxKustomizationType = z.infer<typeof FluxKustomization>;
 export type ClusterSecretStoreType = z.infer<typeof ClusterSecretStore>;
+export type PersistentVolumeClaimType = z.infer<typeof PersistentVolumeClaim>;
