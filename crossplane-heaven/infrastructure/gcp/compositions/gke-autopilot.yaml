@@ -58,8 +58,13 @@ spec:
             location: us-central1
             enableAutopilot: true
             network: default
+            workloadIdentityConfig:
+              - workloadPool: gcp-lornu-ai.svc.id.goog
+            releaseChannel:
+              - channel: REGULAR
           providerConfigRef:
             name: gcp-provider
+          deletionPolicy: Delete
       patches:
         - fromFieldPath: spec.clusterName
           toFieldPath: metadata.name
