@@ -25,12 +25,3 @@ metadata:
   namespace: crossplane-system
   annotations:
     iam.gke.io/gcp-service-account: crossplane@gcp-lornu-ai.iam.gserviceaccount.com
----
-apiVersion: gcp.upbound.io/v1beta1
-kind: ProviderConfig
-metadata:
-  name: default
-spec:
-  projectID: gcp-lornu-ai
-  credentials:
-    source: InjectedIdentity

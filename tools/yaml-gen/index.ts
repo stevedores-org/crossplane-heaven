@@ -38,10 +38,14 @@ const controllerConfig = generateControllerConfig("provider-gcp", gcpSaEmail);
 const serviceAccount = generateServiceAccount("provider-gcp", gcpSaEmail);
 const providerConfig = generateProviderConfig(config, true);
 
-writeYaml("crossplane/providers/provider-gcp-with-oidc.yaml", [
+// Split into Provider and ProviderConfig to avoid CRD race conditions
+writeYaml("crossplane/providers/gcp/provider/manifests.yaml", [
   ...providers,
   controllerConfig,
   serviceAccount,
+]);
+
+writeYaml("crossplane/providers/gcp/config/manifests.yaml", [
   providerConfig,
 ]);
 
@@ -59,9 +63,16 @@ const esoKustomization = generateFluxKustomization(
 );
 const providersKustomization = generateFluxKustomization(
   "infrastructure-providers",
-  "./infrastructure/crossplane/providers",
+  "./infrastructure/crossplane/providers/gcp/provider",
   config.github.repo,
   ["infrastructure-crossplane"]
+);
+
+const providerConfigKustomization = generateFluxKustomization(
+  "infrastructure-provider-configs",
+  "./infrastructure/crossplane/providers/gcp/config",
+  config.github.repo,
+  ["infrastructure-providers"]
 );
 
 writeYaml("../clusters/stevedores-cluster/flux-system/gotk-sync.yaml", [
@@ -69,6 +80,7 @@ writeYaml("../clusters/stevedores-cluster/flux-system/gotk-sync.yaml", [
   crossplaneKustomization,
   esoKustomization,
   providersKustomization,
+  providerConfigKustomization,
 ]);
 
 // 3. Generate ESO ClusterSecretStore
