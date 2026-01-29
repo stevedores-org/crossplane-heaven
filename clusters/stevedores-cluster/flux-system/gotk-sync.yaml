@@ -68,14 +68,29 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infrastructure-gcp
+  name: infrastructure-gcp-definitions
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./infrastructure/gcp
+  path: ./infrastructure/gcp/compositions
   prune: true
   sourceRef:
     kind: GitRepository
     name: crossplane-heaven
   dependsOn:
     - name: infrastructure-provider-configs
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infrastructure-gcp-claims
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./infrastructure/gcp/claims
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: crossplane-heaven
+  dependsOn:
+    - name: infrastructure-gcp-definitions

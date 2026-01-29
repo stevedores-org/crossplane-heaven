@@ -75,11 +75,18 @@ const providerConfigKustomization = generateFluxKustomization(
   ["infrastructure-providers"]
 );
 
-const gcpKustomization = generateFluxKustomization(
-  "infrastructure-gcp",
-  "./infrastructure/gcp",
+const gcpDefinitionsKustomization = generateFluxKustomization(
+  "infrastructure-gcp-definitions",
+  "./infrastructure/gcp/compositions",
   config.github.repo,
   ["infrastructure-provider-configs"]
+);
+
+const gcpClaimsKustomization = generateFluxKustomization(
+  "infrastructure-gcp-claims",
+  "./infrastructure/gcp/claims",
+  config.github.repo,
+  ["infrastructure-gcp-definitions"]
 );
 
 writeYaml("../clusters/stevedores-cluster/flux-system/gotk-sync.yaml", [
@@ -88,7 +95,8 @@ writeYaml("../clusters/stevedores-cluster/flux-system/gotk-sync.yaml", [
   esoKustomization,
   providersKustomization,
   providerConfigKustomization,
-  gcpKustomization,
+  gcpDefinitionsKustomization,
+  gcpClaimsKustomization,
 ]);
 
 // 3. Generate ESO ClusterSecretStore
