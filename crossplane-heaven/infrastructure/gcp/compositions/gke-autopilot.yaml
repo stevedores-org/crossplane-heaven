@@ -1,0 +1,67 @@
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xclusters.stevedores.org
+spec:
+  group: stevedores.org
+  names:
+    kind: XCluster
+    plural: xclusters
+  claimNames:
+    kind: Cluster
+    plural: clusters
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                provider:
+                  type: string
+                  enum: [gcp]
+                region:
+                  type: string
+                  default: us-central1
+                clusterName:
+                  type: string
+                autopilot:
+                  type: boolean
+                  default: true
+              required:
+                - provider
+                - clusterName
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: gke-autopilot
+  labels:
+    provider: gcp
+    cluster: autopilot
+spec:
+  compositeTypeRef:
+    apiVersion: stevedores.org/v1alpha1
+    kind: XCluster
+  resources:
+    - name: gke-cluster
+      base:
+        apiVersion: container.gcp.upbound.io/v1beta1
+        kind: Cluster
+        spec:
+          forProvider:
+            location: us-central1
+            enableAutopilot: true
+            network: default
+          providerConfigRef:
+            name: gcp-provider
+      patches:
+        - fromFieldPath: spec.clusterName
+          toFieldPath: metadata.name
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.location

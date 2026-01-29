@@ -1,0 +1,11 @@
+---
+apiVersion: stevedores.org/v1alpha1
+kind: Cluster
+metadata:
+  name: stevedores-gke
+  namespace: crossplane-system
+spec:
+  provider: gcp
+  clusterName: stevedores-gke
+  region: us-central1
+  autopilot: true
