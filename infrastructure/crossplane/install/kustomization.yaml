@@ -5,15 +5,4 @@ namespace: crossplane-system
 
 resources:
   - namespace.yaml
-  - crds/compositeresourcedefinitions.yaml
-  - crds/compositions.yaml
-  - deployment.yaml
-
-patches:
-  - target:
-      kind: Deployment
-      name: crossplane
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/args/-
-        value: --enable-environment-configs
+  - crossplane-manifests.yaml
