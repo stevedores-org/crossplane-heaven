@@ -7,7 +7,7 @@ metadata:
 spec:
   interval: 1m0s
   ref:
-    branch: master
+    branch: main
   url: https://github.com/stevedores-org/crossplane-heaven.git
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
