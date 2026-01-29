@@ -12,7 +12,7 @@ export const config: InfraConfigType = {
   github: {
     org: "stevedores-org",
     repo: "crossplane-heaven",
-    branch: "main",
+    branch: "master",
   },
   crossplane: {
     version: "v1.14.5",
