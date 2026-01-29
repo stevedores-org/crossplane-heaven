@@ -323,3 +323,63 @@ spec:
                 port:
                   number: 80
   tls: []
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oxidizedgraph-docs
+  namespace: default
+  labels:
+    app: oxidizedgraph-docs
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: oxidizedgraph-docs
+  template:
+    metadata:
+      labels:
+        app: oxidizedgraph-docs
+    spec:
+      containers:
+        - name: oxidizedgraph-docs
+          image: >-
+            us-central1-docker.pkg.dev/gcp-lornu-ai/cloud-run-source-deploy/oxidizedgraph-docs:latest
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 2
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oxidizedgraph-docs-service
+  namespace: default
+  labels:
+    app: oxidizedgraph-docs
+spec:
+  selector:
+    app: oxidizedgraph-docs
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http
+  type: ClusterIP
