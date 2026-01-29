@@ -1,0 +1,35 @@
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-gcp-container
+spec:
+  package: xpkg.upbound.io/upbound/provider-gcp-container:v0.41.0
+  controllerConfigRef:
+    name: gcp-workload-identity
+---
+apiVersion: pkg.crossplane.io/v1alpha1
+kind: ControllerConfig
+metadata:
+  name: gcp-workload-identity
+spec:
+  podSecurityContext:
+    fsGroup: 2000
+  serviceAccountName: provider-gcp
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: provider-gcp
+  namespace: crossplane-system
+  annotations:
+    iam.gke.io/gcp-service-account: crossplane@gcp-lornu-ai.iam.gserviceaccount.com
+---
+apiVersion: gcp.upbound.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: default
+spec:
+  projectID: gcp-lornu-ai
+  credentials:
+    source: InjectedIdentity

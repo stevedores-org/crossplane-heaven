@@ -1,0 +1,11 @@
+# Flux GitOps Toolkit components
+# Install with: flux install --export > gotk-components.yaml
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flux-system
+---
+# NOTE: Run `flux install` to generate full components
+# This is a placeholder - generate with:
+# flux install --components-extra=image-reflector-controller,image-automation-controller --export > gotk-components.yaml
