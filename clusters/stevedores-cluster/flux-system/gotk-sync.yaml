@@ -1,3 +1,4 @@
+---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:
@@ -6,7 +7,7 @@ metadata:
 spec:
   interval: 1m0s
   ref:
-    branch: main
+    branch: master
   url: https://github.com/stevedores-org/crossplane-heaven
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -38,26 +39,43 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infrastructure-providers
+  name: crossplane-providers
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: infrastructure-crossplane
   interval: 10m0s
-  path: ./infrastructure/crossplane/providers/gcp/provider
+  path: ./infrastructure/crossplane/providers
   prune: true
   sourceRef:
     kind: GitRepository
     name: crossplane-heaven
-  dependsOn:
-    - name: infrastructure-crossplane
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infrastructure-provider-configs
+  name: crossplane-providerconfig
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: crossplane-providers
+  interval: 10m0s
+  path: ./clusters/stevedores-cluster/providerconfig
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: crossplane-heaven
+  retryInterval: 1m0s
+  timeout: 5m0s
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infrastructure-providerconfig
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./infrastructure/crossplane/providers/gcp/config
+  path: ./infrastructure/crossplane/providerconfig
   prune: true
   sourceRef:
     kind: GitRepository
