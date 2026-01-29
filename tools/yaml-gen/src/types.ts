@@ -99,6 +99,71 @@ export const PersistentVolumeClaim = K8sResource.extend({
   }),
 });
 
+// Kubernetes Deployment
+export const Deployment = K8sResource.extend({
+  apiVersion: z.literal("apps/v1"),
+  kind: z.literal("Deployment"),
+  spec: z.object({
+    replicas: z.number().optional(),
+    selector: z.object({
+      matchLabels: z.record(z.string()),
+    }),
+    template: z.object({
+      metadata: z.object({
+        labels: z.record(z.string()),
+      }),
+      spec: z.object({
+        containers: z.array(z.object({
+          name: z.string(),
+          image: z.string(),
+          ports: z.array(z.object({
+            containerPort: z.number(),
+            name: z.string().optional(),
+          })).optional(),
+          env: z.array(z.object({
+            name: z.string(),
+            value: z.string().optional(),
+            valueFrom: z.any().optional(),
+          })).optional(),
+          volumeMounts: z.array(z.object({
+            name: z.string(),
+            mountPath: z.string(),
+          })).optional(),
+          resources: z.object({
+            requests: z.record(z.string()).optional(),
+            limits: z.record(z.string()).optional(),
+          }).optional(),
+        })),
+        volumes: z.array(z.object({
+          name: z.string(),
+          persistentVolumeClaim: z.object({
+            claimName: z.string(),
+          }).optional(),
+          secret: z.object({
+            secretName: z.string(),
+          }).optional(),
+        })).optional(),
+        serviceAccountName: z.string().optional(),
+      }),
+    }),
+  }),
+});
+
+// Kubernetes Service
+export const Service = K8sResource.extend({
+  apiVersion: z.literal("v1"),
+  kind: z.literal("Service"),
+  spec: z.object({
+    selector: z.record(z.string()),
+    ports: z.array(z.object({
+      port: z.number(),
+      targetPort: z.union([z.number(), z.string()]).optional(),
+      name: z.string().optional(),
+    })),
+    type: z.string().optional(),
+  }),
+});
+
 // Config types
 export const InfraConfig = z.object({
   project: z.object({
@@ -132,6 +197,17 @@ export const InfraConfig = z.object({
       })
     )
     .optional(),
+  apps: z.array(z.object({
+    name: z.string(),
+    image: z.string(),
+    port: z.number(),
+    replicas: z.number().default(1),
+    cpu: z.string().default("100m"),
+    memory: z.string().default("256Mi"),
+    pvcName: z.string().optional(),
+    mountPath: z.string().optional(),
+    env: z.record(z.string()).optional(),
+  })).optional(),
 });
 
 export type InfraConfigType = z.infer<typeof InfraConfig>;
@@ -140,3 +216,5 @@ export type ProviderConfigType = z.infer<typeof ProviderConfig>;
 export type FluxKustomizationType = z.infer<typeof FluxKustomization>;
 export type ClusterSecretStoreType = z.infer<typeof ClusterSecretStore>;
 export type PersistentVolumeClaimType = z.infer<typeof PersistentVolumeClaim>;
+export type DeploymentType = z.infer<typeof Deployment>;
+export type ServiceType = z.infer<typeof Service>;

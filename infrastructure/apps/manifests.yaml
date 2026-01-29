@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oxidizedgraph
+  labels:
+    app: oxidizedgraph
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: oxidizedgraph
+  template:
+    metadata:
+      labels:
+        app: oxidizedgraph
+    spec:
+      containers:
+        - name: oxidizedgraph
+          image: >-
+            us-central1-docker.pkg.dev/gcp-lornu-ai/cloud-run-source-deploy/oxidizedgraph:latest
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests: {}
+          env:
+            - name: RUST_LOG
+              value: info
+            - name: STORAGE_PATH
+              value: /app/data
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: oxidizedgraph-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oxidizedgraph-service
+  labels:
+    app: oxidizedgraph
+spec:
+  selector:
+    app: oxidizedgraph
+  ports:
+    - port: 80
+      targetPort: 8080
+      name: http
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oxidizedrag
+  labels:
+    app: oxidizedrag
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oxidizedrag
+  template:
+    metadata:
+      labels:
+        app: oxidizedrag
+    spec:
+      containers:
+        - name: oxidizedrag
+          image: >-
+            us-central1-docker.pkg.dev/gcp-lornu-ai/cloud-run-source-deploy/oxidizedrag:latest
+          ports:
+            - containerPort: 8081
+              name: http
+          resources:
+            requests: {}
+          env:
+            - name: RUST_LOG
+              value: debug
+            - name: DB_PATH
+              value: /app/db
+            - name: EMBEDDING_BACKEND
+              value: huggingface
+          volumeMounts:
+            - name: data
+              mountPath: /app/db
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: oxidizedrag-db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oxidizedrag-service
+  labels:
+    app: oxidizedrag
+spec:
+  selector:
+    app: oxidizedrag
+  ports:
+    - port: 80
+      targetPort: 8081
+      name: http
+  type: ClusterIP

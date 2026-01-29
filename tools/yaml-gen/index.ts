@@ -12,6 +12,7 @@ import {
 import { generateGitRepository, generateFluxKustomization } from "./src/generators/flux";
 import { generateClusterSecretStore } from "./src/generators/eso";
 import { generatePVCs } from "./src/generators/storage";
+import { generateAppManifests } from "./src/generators/app";
 
 const OUTPUT_DIR = "../../infrastructure";
 
@@ -94,6 +95,13 @@ const storageKustomization = generateFluxKustomization(
   ["infrastructure-gcp-claims"]
 );
 
+const appsKustomization = generateFluxKustomization(
+  "infrastructure-apps",
+  "./infrastructure/apps",
+  config.github.repo,
+  ["infrastructure-storage"]
+);
+
 writeYaml("../clusters/stevedores-cluster/flux-system/gotk-sync.yaml", [
   gitRepo,
   crossplaneKustomization,
@@ -103,6 +111,7 @@ writeYaml("../clusters/stevedores-cluster/flux-system/gotk-sync.yaml", [
   gcpDefinitionsKustomization,
   gcpClaimsKustomization,
   storageKustomization,
+  appsKustomization,
 ]);
 
 // 3. Generate ESO ClusterSecretStore
@@ -113,6 +122,12 @@ writeYaml("eso/cluster-secret-store.yaml", [clusterSecretStore]);
 const pvcs = generatePVCs(config);
 if (pvcs.length > 0) {
   writeYaml("storage/manifests.yaml", pvcs);
+}
+
+// 5. Generate Application manifests
+const apps = generateAppManifests(config);
+if (apps.length > 0) {
+  writeYaml("apps/manifests.yaml", apps);
 }
 
 console.log("\n✨ All manifests generated successfully!");
