@@ -1,0 +1,15 @@
+# Generic
+.DS_Store
+.env
+*.log
+
+# Flux
+.flux.yaml
+
+# Kustomize
+.build/
+
+# Infrastructure
+*.tfstate*
+.terraform/
+kubeconfig*
