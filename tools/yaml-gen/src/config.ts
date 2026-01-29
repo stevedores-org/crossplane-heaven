@@ -54,5 +54,14 @@ export const config: InfraConfigType = {
         EMBEDDING_BACKEND: "huggingface",
       },
     },
+    {
+      name: "stevedores-org",
+      image: "us-central1-docker.pkg.dev/gcp-lornu-ai/cloud-run-source-deploy/stevedores-org:latest",
+      port: 8080,
+      replicas: 2,
+      env: {
+        PORT: "8080",
+      },
+    },
   ],
 };

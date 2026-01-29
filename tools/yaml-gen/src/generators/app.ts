@@ -12,6 +12,7 @@ export function generateAppManifests(config: InfraConfigType): (DeploymentType |
       kind: "Deployment",
       metadata: {
         name: app.name,
+        namespace: "default",
         labels: { app: app.name },
       },
       spec: {
@@ -67,6 +68,7 @@ export function generateAppManifests(config: InfraConfigType): (DeploymentType |
       kind: "Service",
       metadata: {
         name: `${app.name}-service`,
+        namespace: "default",
         labels: { app: app.name },
       },
       spec: {
