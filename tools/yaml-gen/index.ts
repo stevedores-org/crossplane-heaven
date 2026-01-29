@@ -75,12 +75,20 @@ const providerConfigKustomization = generateFluxKustomization(
   ["infrastructure-providers"]
 );
 
+const gcpKustomization = generateFluxKustomization(
+  "infrastructure-gcp",
+  "./infrastructure/gcp",
+  config.github.repo,
+  ["infrastructure-provider-configs"]
+);
+
 writeYaml("../clusters/stevedores-cluster/flux-system/gotk-sync.yaml", [
   gitRepo,
   crossplaneKustomization,
   esoKustomization,
   providersKustomization,
   providerConfigKustomization,
+  gcpKustomization,
 ]);
 
 // 3. Generate ESO ClusterSecretStore
