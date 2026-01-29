@@ -164,6 +164,51 @@ export const Service = K8sResource.extend({
   }),
 });
 
+// Kubernetes Ingress
+export const Ingress = K8sResource.extend({
+  apiVersion: z.literal("networking.k8s.io/v1"),
+  kind: z.literal("Ingress"),
+  spec: z.object({
+    rules: z.array(z.object({
+      host: z.string().optional(),
+      http: z.object({
+        paths: z.array(z.object({
+          path: z.string(),
+          pathType: z.string(),
+          backend: z.object({
+            service: z.object({
+              name: z.string(),
+              port: z.object({
+                number: z.number(),
+              }),
+            }),
+          }),
+        })),
+      }),
+    })),
+    tls: z.array(z.object({
+      hosts: z.array(z.string()),
+      secretName: z.string(),
+    })).optional(),
+  }),
+});
+
+// Cert-Manager ClusterIssuer
+export const ClusterIssuer = K8sResource.extend({
+  apiVersion: z.literal("cert-manager.io/v1"),
+  kind: z.literal("ClusterIssuer"),
+  spec: z.object({
+    acme: z.object({
+      server: z.string(),
+      email: z.string(),
+      privateKeySecretRef: z.object({
+        name: z.string(),
+      }),
+      solvers: z.array(z.any()),
+    }),
+  }),
+});
+
 // Config types
 export const InfraConfig = z.object({
   project: z.object({
@@ -207,6 +252,11 @@ export const InfraConfig = z.object({
     pvcName: z.string().optional(),
     mountPath: z.string().optional(),
     env: z.record(z.string()).optional(),
+    ingress: z.object({
+      host: z.string(),
+      path: z.string().default("/"),
+      tls: z.boolean().default(true),
+    }).optional(),
   })).optional(),
 });
 
@@ -218,3 +268,5 @@ export type ClusterSecretStoreType = z.infer<typeof ClusterSecretStore>;
 export type PersistentVolumeClaimType = z.infer<typeof PersistentVolumeClaim>;
 export type DeploymentType = z.infer<typeof Deployment>;
 export type ServiceType = z.infer<typeof Service>;
+export type IngressType = z.infer<typeof Ingress>;
+export type ClusterIssuerType = z.infer<typeof ClusterIssuer>;

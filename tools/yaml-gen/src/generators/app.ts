@@ -1,9 +1,9 @@
-import type { InfraConfigType, DeploymentType, ServiceType } from "../types";
+import type { InfraConfigType, DeploymentType, ServiceType, IngressType } from "../types";
 
-export function generateAppManifests(config: InfraConfigType): (DeploymentType | ServiceType)[] {
+export function generateAppManifests(config: InfraConfigType): (DeploymentType | ServiceType | IngressType)[] {
   if (!config.apps) return [];
 
-  const manifests: (DeploymentType | ServiceType)[] = [];
+  const manifests: (DeploymentType | ServiceType | IngressType)[] = [];
 
   for (const app of config.apps) {
     // 1. Deployment
@@ -84,6 +84,50 @@ export function generateAppManifests(config: InfraConfigType): (DeploymentType |
       },
     };
     manifests.push(service);
+
+    // 3. Ingress (if host provided)
+    if (app.ingress) {
+      const ingress: IngressType = {
+        apiVersion: "networking.k8s.io/v1",
+        kind: "Ingress",
+        metadata: {
+          name: `${app.name}-ingress`,
+          namespace: "default",
+          annotations: {
+            "kubernetes.io/ingress.class": "gce",
+            "cert-manager.io/cluster-issuer": "letsencrypt-prod",
+          },
+        },
+        spec: {
+          rules: [
+            {
+              host: app.ingress.host,
+              http: {
+                paths: [
+                  {
+                    path: app.ingress.path || "/",
+                    pathType: "Prefix",
+                    backend: {
+                      service: {
+                        name: `${app.name}-service`,
+                        port: { number: 80 },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          tls: app.ingress.tls ? [
+            {
+              hosts: [app.ingress.host],
+              secretName: `${app.name}-tls`,
+            },
+          ] : [],
+        },
+      };
+      manifests.push(ingress);
+    }
   }
 
   return manifests;

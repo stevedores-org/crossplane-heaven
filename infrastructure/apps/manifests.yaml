@@ -157,3 +157,169 @@ spec:
       targetPort: 8080
       name: http
   type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: stevedores-org-ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: gce
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+    - host: stevedores.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: stevedores-org-service
+                port:
+                  number: 80
+  tls: []
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lornu-ai-frontend
+  namespace: default
+  labels:
+    app: lornu-ai-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lornu-ai-frontend
+  template:
+    metadata:
+      labels:
+        app: lornu-ai-frontend
+    spec:
+      containers:
+        - name: lornu-ai-frontend
+          image: >-
+            us-central1-docker.pkg.dev/gcp-lornu-ai/cloud-run-source-deploy/lornu-ai-frontend:latest
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests: {}
+          env:
+            - name: PORT
+              value: '80'
+          volumeMounts: []
+      volumes: []
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lornu-ai-frontend-service
+  namespace: default
+  labels:
+    app: lornu-ai-frontend
+spec:
+  selector:
+    app: lornu-ai-frontend
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lornu-ai-frontend-ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: gce
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+    - host: lornu.ai
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: lornu-ai-frontend-service
+                port:
+                  number: 80
+  tls: []
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lornu-ai-backend
+  namespace: default
+  labels:
+    app: lornu-ai-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lornu-ai-backend
+  template:
+    metadata:
+      labels:
+        app: lornu-ai-backend
+    spec:
+      containers:
+        - name: lornu-ai-backend
+          image: >-
+            us-central1-docker.pkg.dev/gcp-lornu-ai/cloud-run-source-deploy/lornu-ai-backend:latest
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests: {}
+          env:
+            - name: PORT
+              value: '8080'
+            - name: FIRESTORE_PROJECT_ID
+              value: gcp-lornu-ai
+            - name: A2A_PROTOCOL_ENABLED
+              value: 'true'
+          volumeMounts: []
+      volumes: []
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lornu-ai-backend-service
+  namespace: default
+  labels:
+    app: lornu-ai-backend
+spec:
+  selector:
+    app: lornu-ai-backend
+  ports:
+    - port: 80
+      targetPort: 8080
+      name: http
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lornu-ai-backend-ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: gce
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+    - host: api.lornu.ai
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: lornu-ai-backend-service
+                port:
+                  number: 80
+  tls: []

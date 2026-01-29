@@ -13,6 +13,7 @@ import { generateGitRepository, generateFluxKustomization } from "./src/generato
 import { generateClusterSecretStore } from "./src/generators/eso";
 import { generatePVCs } from "./src/generators/storage";
 import { generateAppManifests } from "./src/generators/app";
+import { generateCertManagerManifests } from "./src/generators/cert-manager";
 
 const OUTPUT_DIR = "../../infrastructure";
 
@@ -102,6 +103,13 @@ const appsKustomization = generateFluxKustomization(
   ["infrastructure-storage"]
 );
 
+const certManagerKustomization = generateFluxKustomization(
+  "infrastructure-cert-manager",
+  "./infrastructure/cert-manager",
+  config.github.repo,
+  ["infrastructure-apps"]
+);
+
 writeYaml("../clusters/stevedores-cluster/flux-system/gotk-sync.yaml", [
   gitRepo,
   crossplaneKustomization,
@@ -112,6 +120,7 @@ writeYaml("../clusters/stevedores-cluster/flux-system/gotk-sync.yaml", [
   gcpClaimsKustomization,
   storageKustomization,
   appsKustomization,
+  certManagerKustomization,
 ]);
 
 // 3. Generate ESO ClusterSecretStore
@@ -129,6 +138,10 @@ const apps = generateAppManifests(config);
 if (apps.length > 0) {
   writeYaml("apps/manifests.yaml", apps);
 }
+
+// 6. Generate Cert-Manager manifests
+const issuers = generateCertManagerManifests(config);
+writeYaml("cert-manager/manifests.yaml", issuers);
 
 console.log("\n✨ All manifests generated successfully!");
 console.log("\n📝 Next steps:");

@@ -62,6 +62,35 @@ export const config: InfraConfigType = {
       env: {
         PORT: "8080",
       },
+      ingress: {
+        host: "stevedores.org",
+      },
+    },
+    {
+      name: "lornu-ai-frontend",
+      image: "us-central1-docker.pkg.dev/gcp-lornu-ai/cloud-run-source-deploy/lornu-ai-frontend:latest",
+      port: 80,
+      replicas: 2,
+      env: {
+        PORT: "80",
+      },
+      ingress: {
+        host: "lornu.ai",
+      },
+    },
+    {
+      name: "lornu-ai-backend",
+      image: "us-central1-docker.pkg.dev/gcp-lornu-ai/cloud-run-source-deploy/lornu-ai-backend:latest",
+      port: 8080,
+      replicas: 2,
+      env: {
+        PORT: "8080",
+        FIRESTORE_PROJECT_ID: "gcp-lornu-ai",
+        A2A_PROTOCOL_ENABLED: "true",
+      },
+      ingress: {
+        host: "api.lornu.ai",
+      },
     },
   ],
 };
