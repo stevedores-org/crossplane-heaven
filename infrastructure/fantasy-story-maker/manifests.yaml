@@ -28,6 +28,12 @@ spec:
           ports:
             - containerPort: 8080
               name: http
+          env:
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: fantasy-story-maker-secrets
+                  key: mongodb-uri
           resources:
             requests:
               cpu: 100m
