@@ -139,3 +139,18 @@ spec:
     name: crossplane-heaven
   dependsOn:
     - name: infrastructure-apps
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infrastructure-wxorca
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./infrastructure/wxorca
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: crossplane-heaven
+  dependsOn:
+    - name: infrastructure-cert-manager

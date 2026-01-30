@@ -226,13 +226,13 @@ spec:
           image: >-
             us-central1-docker.pkg.dev/gcp-lornu-ai/cloud-run-source-deploy/lornu-ai-frontend:latest
           ports:
-            - containerPort: 80
+            - containerPort: 8080
               name: http
           resources:
             requests: {}
           env:
             - name: PORT
-              value: '80'
+              value: '8080'
           volumeMounts: []
       volumes: []
 ---
@@ -248,19 +248,20 @@ spec:
     app: lornu-ai-frontend
   ports:
     - port: 80
-      targetPort: 80
+      targetPort: 8080
       name: http
   type: ClusterIP
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: lornu-ai-frontend-ingress
+  name: lornu-ai-ingress
   namespace: default
   annotations:
-    kubernetes.io/ingress.class: gce
+    kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
+  ingressClassName: nginx
   rules:
     - host: lornu.ai
       http:
@@ -272,7 +273,21 @@ spec:
                 name: lornu-ai-frontend-service
                 port:
                   number: 80
-  tls: []
+    - host: api.lornu.ai
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: lornu-ai-backend-service
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - lornu.ai
+        - api.lornu.ai
+      secretName: lornu-ai-tls
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -326,24 +341,62 @@ spec:
       name: http
   type: ClusterIP
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: lornu-ai-backend-ingress
+  name: oxidizedgraph-docs
   namespace: default
-  annotations:
-    kubernetes.io/ingress.class: gce
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+  labels:
+    app: oxidizedgraph-docs
 spec:
-  rules:
-    - host: api.lornu.ai
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: lornu-ai-backend-service
-                port:
-                  number: 80
-  tls: []
+  replicas: 2
+  selector:
+    matchLabels:
+      app: oxidizedgraph-docs
+  template:
+    metadata:
+      labels:
+        app: oxidizedgraph-docs
+    spec:
+      containers:
+        - name: oxidizedgraph-docs
+          image: >-
+            us-central1-docker.pkg.dev/gcp-lornu-ai/cloud-run-source-deploy/oxidizedgraph-docs:latest
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 2
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oxidizedgraph-docs-service
+  namespace: default
+  labels:
+    app: oxidizedgraph-docs
+spec:
+  selector:
+    app: oxidizedgraph-docs
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http
+  type: ClusterIP
