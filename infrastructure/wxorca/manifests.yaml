@@ -244,10 +244,17 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    # Frontend
+    # Frontend with API proxy
     - host: wxorca.liteworks.media
       http:
         paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: wxorca-backend
+                port:
+                  number: 80
           - path: /
             pathType: Prefix
             backend:
@@ -255,7 +262,7 @@ spec:
                 name: wxorca-frontend
                 port:
                   number: 80
-    # Backend API
+    # Backend API (direct access)
     - host: api.wxorca.liteworks.media
       http:
         paths:
