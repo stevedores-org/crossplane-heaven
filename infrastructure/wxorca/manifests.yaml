@@ -31,10 +31,10 @@ spec:
     spec:
       containers:
         - name: surrealdb
-          image: surrealdb/surrealdb:latest
+          image: surrealdb/surrealdb:v2.1.4
           args:
             - start
-            - --addr=0.0.0.0:8000
+            - --bind=0.0.0.0:8000
             - --user=root
             - --pass=root
             - memory
