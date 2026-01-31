@@ -283,11 +283,69 @@ spec:
                 name: lornu-ai-backend-service
                 port:
                   number: 80
+    - host: preview.lornu.ai
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: lornu-ai-preview-service
+                port:
+                  number: 80
   tls:
     - hosts:
         - lornu.ai
         - api.lornu.ai
+        - preview.lornu.ai
       secretName: lornu-ai-tls
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lornu-ai-preview
+  namespace: default
+  labels:
+    app: lornu-ai-preview
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lornu-ai-preview
+  template:
+    metadata:
+      labels:
+        app: lornu-ai-preview
+    spec:
+      containers:
+        - name: lornu-ai-preview
+          image: us-central1-docker.pkg.dev/gcp-lornu-ai/cloud-run-source-deploy/lornu-ai-frontend:latest
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: PORT
+              value: "8080"
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lornu-ai-preview-service
+  namespace: default
+  labels:
+    app: lornu-ai-preview
+spec:
+  selector:
+    app: lornu-ai-preview
+  ports:
+    - port: 80
+      targetPort: 8080
+      name: http
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
