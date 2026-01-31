@@ -319,7 +319,7 @@ spec:
     spec:
       containers:
         - name: lornu-ai-preview
-          image: us-central1-docker.pkg.dev/gcp-lornu-ai/cloud-run-source-deploy/lornu-ai-frontend:latest
+          image: us-central1-docker.pkg.dev/gcp-lornu-ai/cloud-run-source-deploy/lornu-ai-frontend:preview
           ports:
             - containerPort: 8080
               name: http
