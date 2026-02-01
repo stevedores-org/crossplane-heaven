@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - crossplane/providers/gcp.yaml
   - gcp/compositions/gke-autopilot.yaml
-  - gcp/claims/stevedores-gke.yaml
+  # stevedores-gke cluster claim removed - cluster decommissioned
