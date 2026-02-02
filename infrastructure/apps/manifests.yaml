@@ -293,11 +293,22 @@ spec:
                 name: lornu-ai-preview-service
                 port:
                   number: 80
+    - host: pitch-deck.lornu.ai
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pitch-deck-service
+                port:
+                  number: 80
   tls:
     - hosts:
         - lornu.ai
         - api.lornu.ai
         - preview.lornu.ai
+        - pitch-deck.lornu.ai
       secretName: lornu-ai-tls
 ---
 apiVersion: apps/v1
@@ -461,5 +472,64 @@ spec:
   ports:
     - port: 80
       targetPort: 80
+      name: http
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pitch-deck
+  namespace: default
+  labels:
+    app: pitch-deck
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pitch-deck
+  template:
+    metadata:
+      labels:
+        app: pitch-deck
+    spec:
+      containers:
+        - name: pitch-deck
+          image: us-central1-docker.pkg.dev/gcp-lornu-ai/cloud-run-source-deploy/pitch-deck:latest
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pitch-deck-service
+  namespace: default
+  labels:
+    app: pitch-deck
+spec:
+  selector:
+    app: pitch-deck
+  ports:
+    - port: 80
+      targetPort: 8080
       name: http
   type: ClusterIP
