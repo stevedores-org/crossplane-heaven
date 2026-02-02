@@ -6,7 +6,7 @@ metadata:
   labels:
     app: oxidizedgraph
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: oxidizedgraph
@@ -116,7 +116,7 @@ metadata:
   labels:
     app: stevedores-org
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: stevedores-org
@@ -412,7 +412,7 @@ metadata:
   labels:
     app: oxidizedgraph-docs
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: oxidizedgraph-docs
