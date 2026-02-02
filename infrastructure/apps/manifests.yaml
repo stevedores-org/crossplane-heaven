@@ -380,6 +380,11 @@ spec:
               value: gcp-lornu-ai
             - name: A2A_PROTOCOL_ENABLED
               value: 'true'
+            - name: RESEND_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: resend-api-key
+                  key: RESEND_API_KEY
           volumeMounts: []
       volumes: []
 ---
